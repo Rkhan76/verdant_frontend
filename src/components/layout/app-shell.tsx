@@ -1,14 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
 import { cn } from '@/lib/utils';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isMinimized, setIsMinimized] = useState(false);
+  const pathname = usePathname();
 
   const toggleMinimize = () => setIsMinimized(!isMinimized);
+
+  if (pathname === '/login') {
+    return <>{children}</>;
+  }
 
   return (
     <>

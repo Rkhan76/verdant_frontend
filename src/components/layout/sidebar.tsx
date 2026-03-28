@@ -29,18 +29,88 @@ const navItems = [
     submenus: [
       { name: 'Teacher', href: '/teachers' },
       { name: 'Add New Teacher', href: '/teachers/add' },
+      { name: 'Teacher Time Table', href: '/teachers/timetable' },
+      { name: 'Teacher Details', href: '/teachers/detail' },
     ]
   },
-  { name: 'Guardian', icon: UserCheck, href: '/guardian' },
-  { name: 'Classes', icon: Book, href: '/classes' },
-  { name: 'Examinations', icon: CheckSquare, href: '/examinations' },
-  { name: 'Fees Collection', icon: CircleDollarSign, href: '/fees' },
-  { name: 'Attendance', icon: Clock, href: '/attendance' },
-  { name: 'Leaves', icon: Calendar, href: '/leaves' },
+  { 
+    name: 'Guardian', 
+    icon: UserCheck, 
+    href: '/guardian',
+    submenus: [
+      { name: 'Add New Guardians', href: '/guardian/add' },
+      { name: 'Guardians List', href: '/guardian' },
+      { name: 'Edit Guardian', href: '/guardian/edit' },
+      { name: 'Guardian Details', href: '/guardian/detail' },
+    ]
+  },
+  { 
+    name: 'Classes', 
+    icon: Book, 
+    href: '/classes',
+    submenus: [
+      { name: 'Section', href: '/classes/sections' },
+      { name: 'Subjects', href: '/classes/subjects' },
+      { name: 'Class List', href: '/classes' },
+      { name: 'Class Room', href: '/classes/rooms' },
+    ]
+  },
+  { 
+    name: 'Examinations', 
+    icon: CheckSquare, 
+    href: '/examinations',
+    submenus: [
+      { name: 'Exam', href: '/examinations/exam' },
+      { name: 'Exam Schedule', href: '/examinations/schedule' },
+      { name: 'Exam Result', href: '/examinations/result' },
+    ]
+  },
+  { 
+    name: 'Fees Collection', 
+    icon: CircleDollarSign, 
+    href: '/fees',
+    submenus: [
+      { name: 'Fees Collect', href: '/fees/collect' },
+      { name: 'Fees Type', href: '/fees/type' },
+      { name: 'Fees Group', href: '/fees/group' },
+      { name: 'Fees Discount', href: '/fees/discount' },
+    ]
+  },
+  { 
+    name: 'Attendance', 
+    icon: Calendar, 
+    href: '/attendance',
+    submenus: [
+      { name: 'Student Attendance', href: '/attendance/student' },
+      { name: 'Teacher Attendance', href: '/attendance/teacher' },
+      { name: 'Employee Attendance', href: '/attendance/employee' },
+    ]
+  },
+  { 
+    name: 'Leaves', 
+    icon: Clock, 
+    href: '/leaves',
+    submenus: [
+      { name: 'Leave Types', href: '/leaves/types' },
+      { name: 'Leave Request', href: '/leaves/request' },
+    ]
+  },
   { name: 'Certificate', icon: ShieldCheck, href: '/certificate' },
   { name: 'Library', icon: BookOpen, href: '/library' },
   { name: 'Accounts', icon: CreditCard, href: '/accounts' },
-  { name: 'HRM', icon: Briefcase, href: '/hrm' },
+  { 
+    name: 'HRM', 
+    icon: Briefcase, 
+    href: '/hrm',
+    submenus: [
+      { name: 'Employee List', href: '/hrm/employees' },
+      { name: 'Employee Details', href: '/hrm/details' },
+      { name: 'Add New Employee', href: '/hrm/add' },
+      { name: 'Payroll', href: '/hrm/payroll' },
+      { name: 'Designation', href: '/hrm/designation' },
+      { name: 'Department', href: '/hrm/department' },
+    ]
+  },
   { name: 'Settings', icon: Settings, href: '/settings' },
 ];
 
@@ -73,28 +143,12 @@ export function Sidebar({ isMinimized = false, toggleMinimize }: SidebarProps) {
               <span className="text-teal-500">V</span>
             </div>
           </div>
-          {!isMinimized && <span className="text-xl font-bold text-gray-800 tracking-tight overflow-hidden">Verdant</span>}
+          {!isMinimized && <span className="text-lg font-bold text-gray-800 tracking-tight leading-tight">Verdant Public School</span>}
         </Link>
       </div>
 
       <div className="h-[calc(100vh-4rem)] overflow-y-auto py-4 scrollbar-hide overflow-x-hidden">
         
-        {/* User Card */}
-        {!isMinimized && (
-          <div className="px-4 mb-6">
-            <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3 border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src="https://i.pravatar.cc/150?u=admin" />
-                <AvatarFallback>JC</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-semibold text-gray-800 truncate">Jone Copper</p>
-                <p className="text-xs text-gray-500 truncate">Admin</p>
-              </div>
-              <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
-            </div>
-          </div>
-        )}
 
         {/* Navigation */}
         <ul className={cn("space-y-1", isMinimized ? "px-2" : "px-4")}>

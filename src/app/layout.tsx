@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Verdant - School Management",
+  title: "Verdant Public School - Management",
   description: "Modern school management dashboard",
 };
 
