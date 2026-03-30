@@ -11,7 +11,18 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const navItems = [
-  { name: 'Dashboard', icon: Home, href: '/' },
+  { 
+    name: 'Dashboard', 
+    icon: Home, 
+    href: '/',
+    submenus: [
+      { name: 'School', href: '/' },
+      { name: 'Student', href: '/dashboards/student' },
+      { name: 'Teacher', href: '/dashboards/teacher' },
+      { name: 'Parent', href: '/dashboards/parent' },
+      { name: 'LMS', href: '/dashboards/lms' },
+    ]
+  },
   { 
     name: 'Students', 
     icon: Users,
