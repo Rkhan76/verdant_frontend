@@ -158,18 +158,18 @@ export function Sidebar({ isMinimized = false, toggleMinimize }: SidebarProps) {
 
   return (
     <aside className={cn(
-      "fixed left-0 top-0 z-40 h-screen bg-white border-r border-gray-100 transition-all duration-300",
+      "fixed left-0 top-0 z-40 h-screen bg-white dark:bg-[#09090b] border-r border-gray-100 dark:border-[#27272a] transition-all duration-300",
       isMinimized ? "w-[5rem]" : "w-64"
     )}>
       {/* Logo */}
-      <div className={cn("flex h-16 items-center border-b border-gray-100", isMinimized ? "justify-center px-0" : "px-6")}>
+      <div className={cn("flex h-16 items-center border-b border-gray-100 dark:border-[#27272a]", isMinimized ? "justify-center px-0" : "px-6")}>
         <Link href="/" className="flex items-center gap-2">
           <div className="flex shrink-0 h-8 w-8 items-center justify-center rounded bg-gradient-to-br from-teal-400 to-orange-400 font-bold text-white text-lg overflow-hidden">
-            <div className="w-full h-full bg-white flex items-center justify-center rounded-[2px] m-[2px]">
+            <div className="w-full h-full bg-white dark:bg-[#09090b] flex items-center justify-center rounded-[2px] m-[2px]">
               <span className="text-teal-500">V</span>
             </div>
           </div>
-          {!isMinimized && <span className="text-lg font-bold text-gray-800 tracking-tight leading-tight">Verdant Public School</span>}
+          {!isMinimized && <span className="text-lg font-bold text-gray-800 dark:text-gray-200 tracking-tight leading-tight">Verdant Public School</span>}
         </Link>
       </div>
 
@@ -189,7 +189,7 @@ export function Sidebar({ isMinimized = false, toggleMinimize }: SidebarProps) {
                   className={cn(
                     "flex cursor-pointer items-center justify-between rounded-md py-2.5 text-sm transition-colors",
                     isMinimized ? "px-0 justify-center" : "px-3",
-                    isActive ? "bg-[#25a194] text-white font-medium shadow-sm hover:opacity-90" : "text-gray-600 hover:bg-gray-50 hover:text-teal-600"
+                    isActive ? "bg-[#25a194] text-white font-medium shadow-sm hover:opacity-90" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#27272a] hover:text-[#25a194]"
                   )}
                   onClick={() => {
                     if (hasSubmenus) toggleMenu(item.name);
@@ -210,7 +210,7 @@ export function Sidebar({ isMinimized = false, toggleMinimize }: SidebarProps) {
                 
                 {/* Submenus */}
                 {!isMinimized && hasSubmenus && isOpen && (
-                  <ul className="mt-1 mb-2 space-y-1 px-1 whitespace-nowrap overflow-hidden border-l-2 border-gray-100 ml-5 pl-2">
+                  <ul className="mt-1 mb-2 space-y-1 px-1 whitespace-nowrap overflow-hidden border-l-2 border-gray-100 dark:border-[#27272a] ml-5 pl-2">
                     {item.submenus.map((sub) => {
                       const isSubActive = pathname === sub.href;
                       return (
@@ -221,12 +221,12 @@ export function Sidebar({ isMinimized = false, toggleMinimize }: SidebarProps) {
                               "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                               isSubActive 
                                 ? "text-[#25a194] font-medium" 
-                                : "text-gray-500 hover:text-[#25a194] hover:bg-gray-50"
+                                : "text-gray-500 dark:text-gray-400 hover:text-[#25a194] hover:bg-gray-50 dark:hover:bg-[#27272a]"
                             )}
                           >
                             <span className={cn(
                               "h-1.5 w-1.5 rounded-full shrink-0",
-                              isSubActive ? "bg-[#25a194]" : "bg-gray-300"
+                              isSubActive ? "bg-[#25a194]" : "bg-gray-300 dark:bg-gray-600"
                             )} />
                             {sub.name}
                           </Link>
