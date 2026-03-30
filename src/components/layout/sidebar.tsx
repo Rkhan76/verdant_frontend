@@ -112,7 +112,21 @@ const navItems = [
     ]
   },
   { name: 'Notice Board', icon: Bell, href: '/notice-board' },
-  { name: 'Settings', icon: Settings, href: '/settings' },
+  { name: 'Event', icon: Calendar, href: '/event' },
+  { name: 'Message', icon: Mail, href: '/message' },
+  { name: 'Role & Access', icon: ShieldCheck, href: '/role-access' },
+  { name: 'Assign Role', icon: UserCheck, href: '/assign-role' },
+  { 
+    name: 'Settings', 
+    icon: Settings, 
+    href: '/settings',
+    submenus: [
+      { name: 'General', href: '/settings/general' },
+      { name: 'Notification', href: '/settings/notification' },
+      { name: 'Currencies', href: '/settings/currencies' },
+      { name: 'Languages', href: '/settings/languages' },
+    ]
+  },
 ];
 
 interface SidebarProps {
