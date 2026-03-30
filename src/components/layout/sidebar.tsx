@@ -111,6 +111,7 @@ const navItems = [
       { name: 'Department', href: '/hrm/department' },
     ]
   },
+  { name: 'Notice Board', icon: Bell, href: '/notice-board' },
   { name: 'Settings', icon: Settings, href: '/settings' },
 ];
 
