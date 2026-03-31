@@ -30,7 +30,7 @@ export function Topbar({ isMinimized, toggleMinimize }: TopbarProps) {
     try {
       await api.post('/auth/logout');
     } catch (error) {
-      console.error('Logout error:', error);
+      // Ignore errors for logout endpoint (e.g., 404 if it doesn't exist)
     } finally {
       logout();
       router.push('/login');

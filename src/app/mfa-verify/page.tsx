@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,8 +21,13 @@ export default function MfaVerifyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!mfaToken) {
+      router.push('/login');
+    }
+  }, [mfaToken, router]);
+
   if (!mfaToken) {
-    if (typeof window !== 'undefined') router.push('/login');
     return null;
   }
 
