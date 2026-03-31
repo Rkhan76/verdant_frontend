@@ -36,6 +36,10 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;
+    // Skip interceptor for authentication routes to prevent loops and page reloads on wrong credentials
+    if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/mfa')) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {

@@ -52,7 +52,12 @@ export default function MfaVerifyPage() {
           deviceToken: data.deviceToken
         });
         
-        router.push('/dashboards/admin');
+        // Need user role to redirect correctly, but assuming Admin/SuperAdmin for MFA
+        if (data.user.role === 'SUPERADMIN' || data.user.role === 'ADMIN') {
+          router.push('/');
+        } else {
+          router.push('/dashboards/teacher'); // Fallback if other roles somehow trigger MFA
+        }
       }
     } catch (err) {
       console.error('MFA verify error:', err);

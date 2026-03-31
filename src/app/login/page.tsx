@@ -15,7 +15,7 @@ import { AxiosError } from 'axios';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setAuth, setMfaToken, setSetupToken, isAuthenticated, deviceToken } = useAuthStore();
+  const { setAuth, setMfaToken, setSetupToken, isAuthenticated, user, deviceToken } = useAuthStore();
   
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -25,9 +25,19 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboards');
+      if (user?.role === 'SUPERADMIN' || user?.role === 'ADMIN') {
+        router.push('/');
+      } else if (user?.role === 'TEACHER') {
+        router.push('/dashboards/teacher');
+      } else if (user?.role === 'STUDENT') {
+        router.push('/dashboards/student');
+      } else if (user?.role === 'PARENT') {
+        router.push('/dashboards/parent');
+      } else {
+        router.push('/');
+      }
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,13 +70,13 @@ export default function LoginPage() {
         // Role-based redirection
         const role = data.user.role;
         if (role === 'SUPERADMIN' || role === 'ADMIN') {
-          router.push('/dashboards/admin');
+          router.push('/');
         } else if (role === 'TEACHER') {
           router.push('/dashboards/teacher');
         } else if (role === 'STUDENT') {
           router.push('/dashboards/student');
         } else if (role === 'PARENT') {
-          router.push('/dashboards/guardian');
+          router.push('/dashboards/parent');
         } else {
           router.push('/dashboards');
         }

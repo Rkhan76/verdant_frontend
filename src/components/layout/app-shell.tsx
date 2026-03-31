@@ -9,16 +9,23 @@ import { useAuthStore } from '@/store/authStore';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isMinimized, setIsMinimized] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { isAuthenticated } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     const authPaths = ['/login', '/mfa-verify', '/mfa-setup'];
     if (!isAuthenticated && !authPaths.includes(pathname)) {
       router.push('/login');
     }
-  }, [isAuthenticated, pathname, router]);
+  }, [isAuthenticated, pathname, router, mounted]);
 
   const toggleMinimize = () => setIsMinimized(!isMinimized);
 
