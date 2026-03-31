@@ -9,6 +9,7 @@ export interface UserEntity {
   email: string;
   firstName: string;
   lastName: string;
+  fullName?: string;
   role: UserRole;
   roleId: string | null;
   status: UserStatus;
@@ -18,6 +19,49 @@ export interface UserEntity {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+}
+
+export interface AuthResponse {
+  accessToken?: string;
+  refreshToken?: string;
+  deviceToken?: string;
+  user?: UserEntity;
+  requiresMfa?: boolean;
+  mfaToken?: string;
+  requiresMfaSetup?: boolean;
+  setupToken?: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password?: string;
+  deviceToken?: string;
+}
+
+export interface MfaVerifyRequest {
+  mfaToken: string;
+  code: string;
+  trustDevice?: boolean;
+}
+
+export interface MfaSetupRequest {
+  setupToken: string;
+}
+
+export interface MfaSetupResponse {
+  secret: string;
+  qrCodeUrl: string;
+}
+
+export interface MfaSetupConfirmRequest {
+  setupToken: string;
+  secret: string;
+  code: string;
+}
+
+export interface MfaSetupConfirmResponse {
+  success: boolean;
+  backupCodes: string[];
 }
 
 export interface AdmissionEntity {

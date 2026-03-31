@@ -1,18 +1,29 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/authStore';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isMinimized, setIsMinimized] = useState(false);
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const authPaths = ['/login', '/mfa-verify', '/mfa-setup'];
+    if (!isAuthenticated && !authPaths.includes(pathname)) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, pathname, router]);
 
   const toggleMinimize = () => setIsMinimized(!isMinimized);
 
-  if (pathname === '/login') {
+  const authPaths = ['/login', '/mfa-verify', '/mfa-setup'];
+  if (authPaths.includes(pathname)) {
     return <>{children}</>;
   }
 

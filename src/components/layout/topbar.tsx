@@ -3,6 +3,7 @@
 import { Search, Moon, Sun, Bell, ChevronRight, User, HelpCircle, Settings, LogOut } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useRouter } from 'next/navigation';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -12,6 +13,8 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { useThemeStore } from '@/store/themeStore';
+import { useAuthStore } from '@/store/authStore';
+import api from '@/lib/api/axios';
 
 interface TopbarProps {
   isMinimized?: boolean;
@@ -19,8 +22,24 @@ interface TopbarProps {
 }
 
 export function Topbar({ isMinimized, toggleMinimize }: TopbarProps) {
+  const router = useRouter();
   const { theme, toggleTheme } = useThemeStore();
+  const { user, logout } = useAuthStore();
   
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      logout();
+      router.push('/login');
+    }
+  };
+
+  const userName = user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'User';
+  const roleName = user?.role || 'Guest';
+
   return (
     <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between bg-white dark:bg-[#09090b] px-8 border-b border-gray-100 dark:border-[#27272a] transition-all">
       <div className="flex items-center gap-4 flex-1">
@@ -62,12 +81,12 @@ export function Topbar({ isMinimized, toggleMinimize }: TopbarProps) {
           <DropdownMenuTrigger className="outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#25a194] focus-visible:ring-offset-2 rounded-lg flex items-center">
             <div className="bg-gray-50 dark:bg-[#27272a] rounded-lg p-2 pr-3 flex items-center gap-3 border border-gray-100 dark:border-[#3f3f46] cursor-pointer hover:bg-gray-100 dark:hover:bg-[#3f3f46] transition-colors">
               <Avatar className="h-9 w-9">
-                <AvatarImage src="https://i.pravatar.cc/150?u=admin" />
-                <AvatarFallback>JC</AvatarFallback>
+                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userName.replace(' ', '')}`} />
+                <AvatarFallback>{userName.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="hidden md:block text-left">
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">Jone Copper</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Admin</p>
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">{userName}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{roleName}</p>
               </div>
               <ChevronRight className="h-4 w-4 text-gray-400 shrink-0 hidden md:block" />
             </div>
@@ -75,20 +94,20 @@ export function Topbar({ isMinimized, toggleMinimize }: TopbarProps) {
           <DropdownMenuContent align="end" className="w-56 mt-1 p-2 bg-white dark:bg-[#18181b] rounded-xl shadow-lg border-gray-100 dark:border-[#27272a]">
             <div className="flex items-center gap-3 p-2 mb-2">
               <Avatar className="h-10 w-10">
-                <AvatarImage src="https://i.pravatar.cc/150?u=admin" />
-                <AvatarFallback>JC</AvatarFallback>
+                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userName.replace(' ', '')}`} />
+                <AvatarFallback>{userName.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">Jone Copper</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Admin</p>
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{userName}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{roleName}</p>
               </div>
             </div>
             <DropdownMenuSeparator className="bg-gray-100 dark:bg-[#27272a] mb-2" />
-            <DropdownMenuItem className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg text-gray-600 hover:text-[#25a194] hover:bg-[#25a194]/10 focus:bg-[#25a194]/10 focus:text-[#25a194]">
+            <DropdownMenuItem className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:text-[#25a194] dark:hover:text-[#25a194] hover:bg-[#25a194]/10 dark:hover:bg-[#25a194]/20 focus:bg-[#25a194]/10 focus:text-[#25a194]">
               <User className="h-4 w-4" />
               <span className="font-medium">User Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg text-gray-600 hover:text-[#25a194] hover:bg-[#25a194]/10 focus:bg-[#25a194]/10 focus:text-[#25a194]">
+            <DropdownMenuItem className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:text-[#25a194] dark:hover:text-[#25a194] hover:bg-[#25a194]/10 dark:hover:bg-[#25a194]/20 focus:bg-[#25a194]/10 focus:text-[#25a194]">
               <HelpCircle className="h-4 w-4" />
               <span className="font-medium">Help List</span>
             </DropdownMenuItem>
@@ -97,7 +116,10 @@ export function Topbar({ isMinimized, toggleMinimize }: TopbarProps) {
               <span className="font-medium">Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-gray-100 dark:bg-[#27272a] my-2" />
-            <DropdownMenuItem className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-600 focus:bg-red-50 focus:text-red-600">
+            <DropdownMenuItem 
+              onClick={handleLogout}
+              className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-600 focus:bg-red-50 focus:text-red-600"
+            >
               <LogOut className="h-4 w-4" />
               <span className="font-medium">Sign Out</span>
             </DropdownMenuItem>
