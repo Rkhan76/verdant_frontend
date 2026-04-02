@@ -125,8 +125,9 @@ const navItems = [
   { name: 'Notice Board', icon: Bell, href: '/notice-board' },
   { name: 'Event', icon: Calendar, href: '/event' },
   { name: 'Message', icon: Mail, href: '/message' },
-  { name: 'Role & Access', icon: ShieldCheck, href: '/role-access' },
-  { name: 'Assign Role', icon: UserCheck, href: '/assign-role' },
+  { name: 'Members', icon: Users, href: '/members' },
+  { name: 'Roles', icon: ShieldCheck, href: '/roles' },
+  { name: 'Permissions', icon: UserCheck, href: '/permissions' },
   { 
     name: 'Settings', 
     icon: Settings, 

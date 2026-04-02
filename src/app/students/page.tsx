@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { 
-  MoreVertical, Filter, Download, Trash2
+  MoreVertical, Filter, Download, Trash2, Eye, Edit
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -136,11 +136,14 @@ export default function StudentsPage() {
                     </span>
                   </td>
                   <td className="p-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link href={`/students/${student.id}`} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors">
-                        <MoreVertical className="h-4 w-4" />
+                    <div className="flex items-center justify-end gap-1">
+                      <Link href={`/students/${student.id}`} className="h-8 w-8 rounded text-gray-400 hover:text-[#25a194] hover:bg-[#25a194]/10 flex items-center justify-center transition-colors">
+                        <Eye className="h-4 w-4" />
                       </Link>
-                      <button onClick={() => handleDelete(student.id)} className="p-2 text-red-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors">
+                      <Link href={`/students/edit/${student.id}`} className="h-8 w-8 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center transition-colors">
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                      <button onClick={() => handleDelete(student.id)} className="h-8 w-8 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors">
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>

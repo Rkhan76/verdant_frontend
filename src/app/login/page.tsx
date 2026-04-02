@@ -18,8 +18,8 @@ export default function LoginPage() {
   const { setAuth, setMfaToken, setSetupToken, isAuthenticated, user, deviceToken } = useAuthStore();
   
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('superadmin@verdant.local');
+  const [password, setPassword] = useState('Password123!');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,7 +92,7 @@ export default function LoginPage() {
 
   const handleRoleQuickLogin = (roleEmail: string) => {
     setEmail(roleEmail);
-    setPassword('Password@123'); // Example password
+    setPassword('Password123!');
   };
 
   return (
@@ -212,7 +212,7 @@ export default function LoginPage() {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => handleRoleQuickLogin('superadmin@verdant.com')}
+              onClick={() => handleRoleQuickLogin('superadmin@verdant.local')}
               className="bg-[#10b981] hover:bg-[#059669] text-white border-0 h-10 px-0 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
               disabled={isLoading}
             >
@@ -221,7 +221,7 @@ export default function LoginPage() {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => handleRoleQuickLogin('admin@verdant.com')}
+              onClick={() => handleRoleQuickLogin('admin@verdant.local')}
               className="bg-[#0ea5e9] hover:bg-[#0284c7] text-white border-0 h-10 px-0 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
               disabled={isLoading}
             >
@@ -230,7 +230,7 @@ export default function LoginPage() {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => handleRoleQuickLogin('student@verdant.com')}
+              onClick={() => handleRoleQuickLogin('student@verdant.local')}
               className="bg-[#f97316] hover:bg-[#ea580c] text-white border-0 h-10 px-0 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
               disabled={isLoading}
             >
@@ -239,7 +239,7 @@ export default function LoginPage() {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => handleRoleQuickLogin('teacher@verdant.com')}
+              onClick={() => handleRoleQuickLogin('teacher@verdant.local')}
               className="bg-[#a855f7] hover:bg-[#9333ea] text-white border-0 h-10 px-0 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
               disabled={isLoading}
             >
@@ -248,7 +248,7 @@ export default function LoginPage() {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => handleRoleQuickLogin('guardian@verdant.com')}
+              onClick={() => handleRoleQuickLogin('guardian@verdant.local')}
               className="bg-[#25a194] hover:bg-[#1d8277] text-white border-0 h-10 px-0 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
               disabled={isLoading}
             >
@@ -257,7 +257,7 @@ export default function LoginPage() {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={() => handleRoleQuickLogin('librarian@verdant.com')}
+              onClick={() => handleRoleQuickLogin('librarian@verdant.local')}
               className="bg-[#ec4899] hover:bg-[#db2777] text-white border-0 h-10 px-0 flex items-center justify-center gap-1.5 transition-colors shadow-sm"
               disabled={isLoading}
             >
