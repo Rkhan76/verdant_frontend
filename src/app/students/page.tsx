@@ -1,19 +1,49 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { 
-  MoreVertical, MoreHorizontal, Filter, Download
+  MoreVertical, Filter, Download, Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
-
-// Dummy data from mock
-const students = [
-  { s_l: '01', admissionNo: 'AD52365', name: 'Kathryn Murphy', rollNo: '12', class: 'Class 1 (A)', dob: '05 May 2012', gender: 'Male', mobile: '209.555.0104', category: 'General', status: 'Active', color: 'bg-green-100 text-green-700', avatar: 'https://i.pravatar.cc/150?u=12' },
-  { s_l: '02', admissionNo: 'AD52366', name: 'Floyd Miles', rollNo: '1', class: 'Class 2 (B)', dob: '05 May 2012', gender: 'Female', mobile: '209.555.0104', category: 'Special', status: 'Inactive', color: 'bg-red-100 text-red-700', avatar: 'https://i.pravatar.cc/150?u=1' },
-];
+import { toast } from 'sonner';
+import { studentApi, StudentResponse } from '@/lib/api/students';
 
 export default function StudentsPage() {
+  const [students, setStudents] = useState<StudentResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      setIsLoading(true);
+      const data = await studentApi.getAllStudents();
+      setStudents(data);
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Failed to fetch students');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this student?')) return;
+    
+    try {
+      await studentApi.deleteStudent(id);
+      toast.success('Student deleted successfully');
+      setStudents(students.filter(s => s.id !== id));
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Failed to delete student');
+    }
+  };
+
   return (
     <div className="w-full">
       {/* Page Header */}
@@ -38,7 +68,8 @@ export default function StudentsPage() {
         
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row items-center justify-between p-4 border-b border-gray-100 gap-4">
-          <div className="flex items-center gap-3 w-full md:w-auto">
+           {/* Replace original messy toolbar with a simpler one for now */}
+           <div className="flex items-center gap-3 w-full md:w-auto">
             <Button variant="outline" className="h-9 font-normal text-gray-600 border-gray-200">
               <Download className="mr-2 h-4 w-4" /> Export
             </Button>
@@ -56,14 +87,6 @@ export default function StudentsPage() {
               Filter <Filter className="ml-2 h-4 w-4" />
             </Button>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>Rows per page:</span>
-            <select className="h-9 border border-gray-200 rounded-md bg-white px-2 focus:outline-none focus:ring-1 focus:ring-[#25a194]">
-              <option>10</option>
-              <option>20</option>
-              <option>50</option>
-            </select>
-          </div>
         </div>
 
         {/* Table Content */}
@@ -72,47 +95,55 @@ export default function StudentsPage() {
             <thead className="bg-white border-b border-gray-100 text-gray-700 font-semibold">
               <tr>
                 <th className="p-4 w-12"><Checkbox className="border-gray-300 data-[state=checked]:bg-[#25a194] data-[state=checked]:border-[#25a194]" /></th>
-                <th className="p-4 py-5">S.L</th>
                 <th className="p-4">Admission No</th>
-                <th className="p-4">Name</th>
-                <th className="p-4">Class</th>
+                <th className="p-4">Name & Email</th>
+                <th className="p-4">Class/Sec</th>
                 <th className="p-4">Date of Birth</th>
-                <th className="p-4">Gender</th>
-                <th className="p-4">Mobile Number</th>
-                <th className="p-4">Category</th>
+                <th className="p-4">Phone</th>
                 <th className="p-4">Status</th>
                 <th className="p-4 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 bg-white">
-              {students.map((student, idx) => (
-                <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+              {isLoading ? (
+                <tr><td colSpan={8} className="p-8 text-center text-gray-500">Loading students...</td></tr>
+              ) : students.length === 0 ? (
+                <tr><td colSpan={8} className="p-8 text-center text-gray-500">No students found.</td></tr>
+              ) : students.map((student) => (
+                <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="p-4 w-12"><Checkbox className="border-gray-300 data-[state=checked]:bg-[#25a194] data-[state=checked]:border-[#25a194]" /></td>
-                  <td className="p-4 text-gray-500">{student.s_l}</td>
-                  <td className="p-4 text-[#25a194] font-medium">{student.admissionNo}</td>
+                  <td className="p-4 text-[#25a194] font-medium">{student.admissionNumber || '-'}</td>
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <img src={student.avatar} alt={student.name} className="h-10 w-10 rounded-full object-cover border border-gray-100" />
+                      <div className="h-10 w-10 flex shrink-0 items-center justify-center rounded-full bg-[#25a194] text-white font-semibold">
+                        {student.fullName?.charAt(0) || 'U'}
+                      </div>
                       <div>
-                        <p className="font-semibold text-gray-800">{student.name}</p>
-                        <p className="text-xs text-gray-500">Roll No: <span className="font-medium text-gray-700">{student.rollNo}</span></p>
+                        <p className="font-semibold text-gray-800">{student.fullName}</p>
+                        <p className="text-xs text-gray-500">{student.email || 'N/A'}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 text-gray-600">{student.class}</td>
-                  <td className="p-4 text-gray-600">{student.dob}</td>
-                  <td className="p-4 text-gray-600">{student.gender}</td>
-                  <td className="p-4 text-gray-600">{student.mobile}</td>
-                  <td className="p-4 text-gray-600">{student.category}</td>
+                  <td className="p-4 text-gray-600">
+                    <span className="block text-sm">{student.classId?.substring(0,8) || '-'}</span>
+                    <span className="block text-xs text-gray-400 ml-1">{student.sectionId?.substring(0,8) || ''}</span>
+                  </td>
+                  <td className="p-4 text-gray-600">{student.dateOfBirth || '-'}</td>
+                  <td className="p-4 text-gray-600">{student.phone || '-'}</td>
                   <td className="p-4">
-                    <span className={`px-3 py-1 text-xs font-semibold rounded ${student.color}`}>
-                      {student.status}
+                    <span className="px-3 py-1 text-xs font-semibold rounded bg-green-100 text-green-700">
+                      Active
                     </span>
                   </td>
                   <td className="p-4 text-right">
-                    <button className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors">
-                      <MoreVertical className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Link href={`/students/${student.id}`} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors">
+                        <MoreVertical className="h-4 w-4" />
+                      </Link>
+                      <button onClick={() => handleDelete(student.id)} className="p-2 text-red-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -122,17 +153,7 @@ export default function StudentsPage() {
 
         {/* Pagination bar */}
         <div className="flex items-center justify-between p-4 border-t border-gray-100 bg-white">
-          <p className="text-sm text-gray-500">Showing 1 to 2 of 2 entries</p>
-          <div className="flex items-center gap-1">
-            <button className="h-8 w-8 flex items-center justify-center rounded text-gray-400 hover:bg-gray-100 transition-colors">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/></svg>
-            </button>
-            <button className="h-8 w-8 flex items-center justify-center rounded bg-[#25a194] text-white font-medium">1</button>
-            <button className="h-8 w-8 flex items-center justify-center rounded text-gray-600 hover:bg-gray-100 transition-colors font-medium">2</button>
-            <button className="h-8 w-8 flex items-center justify-center rounded text-gray-400 hover:bg-gray-100 transition-colors">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
-            </button>
-          </div>
+          <p className="text-sm text-gray-500">Showing {students.length} entries</p>
         </div>
 
       </div>
