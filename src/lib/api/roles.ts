@@ -1,6 +1,7 @@
 import api from './axios';
 import type {
   Role,
+  RoleMaster,
   CreateRoleDto,
   UpdateRoleDto,
   RolePermission,
@@ -10,6 +11,11 @@ import type {
 export const rolesApi = {
   getAll: async (): Promise<Role[]> => {
     const res = await api.get('/roles');
+    return res.data;
+  },
+
+  getMaster: async (): Promise<RoleMaster[]> => {
+    const res = await api.get('/roles/master');
     return res.data;
   },
 

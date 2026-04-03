@@ -39,7 +39,6 @@ const navItems = [
     href: '/teachers',
     submenus: [
       { name: 'Teacher', href: '/teachers' },
-      { name: 'Add New Teacher', href: '/teachers/add' },
       { name: 'Teacher Time Table', href: '/teachers/timetable' },
       { name: 'Teacher Details', href: '/teachers/detail' },
     ]

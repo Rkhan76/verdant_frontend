@@ -1,15 +1,18 @@
 import { create } from 'zustand';
 import { rolesApi } from '@/lib/api/roles';
 import { permissionsApi } from '@/lib/api/permissions';
-import type { Role, Permission, CreateRoleDto, UpdateRoleDto } from '@/lib/types';
+import type { Role, RoleMaster, Permission, CreateRoleDto, UpdateRoleDto } from '@/lib/types';
 
 interface RolesState {
   roles: Role[];
+  rolesMaster: RoleMaster[];
   allPermissions: Permission[];
   isLoading: boolean;
+  isFetchingMaster: boolean;
   error: string | null;
 
   fetchRoles: () => Promise<void>;
+  fetchRolesMaster: () => Promise<void>;
   fetchAllPermissions: () => Promise<void>;
   createRole: (dto: CreateRoleDto) => Promise<void>;
   updateRole: (id: string, dto: UpdateRoleDto) => Promise<void>;
@@ -19,9 +22,22 @@ interface RolesState {
 
 export const useRolesStore = create<RolesState>((set, get) => ({
   roles: [],
+  rolesMaster: [],
   allPermissions: [],
   isLoading: false,
+  isFetchingMaster: false,
   error: null,
+
+  fetchRolesMaster: async () => {
+    if (get().isFetchingMaster) return;
+    set({ isFetchingMaster: true });
+    try {
+      const rolesMaster = await rolesApi.getMaster();
+      set({ rolesMaster });
+    } finally {
+      set({ isFetchingMaster: false });
+    }
+  },
 
   fetchRoles: async () => {
     set({ isLoading: true, error: null });

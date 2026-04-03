@@ -94,6 +94,13 @@ export interface UpdateMemberDto {
   status?: UserStatus;
 }
 
+// ── Role master (lightweight list) ───────────────────────────────────────
+
+export interface RoleMaster {
+  id: string;
+  role: string;
+}
+
 // ── Permissions & Roles ───────────────────────────────────────────────────
 
 export interface Permission {
