@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   Home, Users, BookOpen, UserCheck, Calendar,
   CreditCard, CheckSquare, Clock, ShieldCheck, 
@@ -146,6 +146,7 @@ interface SidebarProps {
 
 export function Sidebar({ isMinimized = false, toggleMinimize }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [openMenus, setOpenMenus] = useState<string[]>(['Students']);
 
   const toggleMenu = (name: string) => {
@@ -192,7 +193,7 @@ export function Sidebar({ isMinimized = false, toggleMinimize }: SidebarProps) {
                   )}
                   onClick={() => {
                     if (hasSubmenus) toggleMenu(item.name);
-                    else window.location.href = item.href;
+                    else router.push(item.href);
                   }}
                   title={isMinimized ? item.name : undefined}
                 >

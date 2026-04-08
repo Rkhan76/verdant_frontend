@@ -8,6 +8,7 @@ interface AuthState {
   refreshToken: string | null;
   deviceToken: string | null;
   isAuthenticated: boolean;
+  hasHydrated: boolean;
   
   // MFA related temporary state
   mfaToken: string | null;
@@ -18,6 +19,7 @@ interface AuthState {
   setSetupToken: (token: string) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   setDeviceToken: (token: string) => void;
+  setHasHydrated: (hydrated: boolean) => void;
   logout: () => void;
 }
 
@@ -29,6 +31,7 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       deviceToken: typeof window !== 'undefined' ? localStorage.getItem('deviceToken') : null,
       isAuthenticated: false,
+      hasHydrated: false,
       mfaToken: null,
       setupToken: null,
 
@@ -46,7 +49,7 @@ export const useAuthStore = create<AuthState>()(
       
       setSetupToken: (token) => set({ setupToken: token }),
 
-      setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
+      setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken, isAuthenticated: true }),
 
       setDeviceToken: (token) => {
         if (typeof window !== 'undefined') {
@@ -54,6 +57,8 @@ export const useAuthStore = create<AuthState>()(
         }
         set({ deviceToken: token });
       },
+
+      setHasHydrated: (hasHydrated) => set({ hasHydrated }),
 
       logout: () => {
         if (typeof window !== 'undefined') {
@@ -65,6 +70,7 @@ export const useAuthStore = create<AuthState>()(
           accessToken: null, 
           refreshToken: null, 
           isAuthenticated: false,
+          hasHydrated: true,
           mfaToken: null,
           setupToken: null
         });
@@ -73,6 +79,9 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'verdant-auth',
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       partialize: (state) => ({ 
         user: state.user, 
         accessToken: state.accessToken, 
