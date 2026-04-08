@@ -1,53 +1,340 @@
 'use client';
 
+import * as React from 'react';
 import Link from 'next/link';
+import { ColumnDef, PaginationState } from '@tanstack/react-table';
+import { AxiosError } from 'axios';
+import { Search, Download, Eye, Edit, Trash2, Loader2, AlertCircle, RefreshCcw } from 'lucide-react';
+import { toast } from 'sonner';
+import { academicApi } from '@/lib/api/academic';
+import type {
+  AcademicClass,
+  AcademicSection,
+  CreateAcademicSectionDto,
+  PaginatedResponse,
+  UpdateAcademicSectionDto,
+} from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, ChevronLeft, ChevronRight, Download, Eye, Edit, Trash2 } from 'lucide-react';
+import { Modal } from '@/components/ui/modal';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DataTable } from '@/components/ui/data-table';
 
-const sectionsData = [
-  { sl: '01', sectionName: 'A', status: 'Active' },
-  { sl: '02', sectionName: 'B', status: 'Inactive' },
-  { sl: '03', sectionName: 'C', status: 'Active' },
-  { sl: '04', sectionName: 'D', status: 'Inactive' },
-  { sl: '05', sectionName: 'E', status: 'Active' },
-  { sl: '06', sectionName: 'F', status: 'Inactive' },
-  { sl: '07', sectionName: 'G', status: 'Active' },
-  { sl: '08', sectionName: 'H', status: 'Inactive' },
-  { sl: '09', sectionName: 'I', status: 'Active' },
-  { sl: '10', sectionName: 'J', status: 'Inactive' },
-];
+function getErrorMessage(error: unknown, fallback: string) {
+  const axiosError = error as AxiosError<{ message?: string | string[] }>;
+  const message = axiosError.response?.data?.message;
+  return Array.isArray(message) ? message.join(', ') : message || fallback;
+}
+
+function buildColumns(
+  onView: (item: AcademicSection) => void,
+  onEdit: (item: AcademicSection) => void,
+  onDelete: (item: AcademicSection) => void,
+): ColumnDef<AcademicSection>[] {
+  return [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={(table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')) as boolean}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      id: 'serial',
+      header: 'S.L',
+      cell: ({ row, table }) => {
+        const pagination = table.getState().pagination;
+        return pagination.pageIndex * pagination.pageSize + row.index + 1;
+      },
+    },
+    {
+      accessorKey: 'name',
+      header: 'Section',
+      cell: ({ row }) => <span className="font-semibold text-gray-800">{row.original.name}</span>,
+    },
+    {
+      id: 'className',
+      header: 'Class',
+      cell: ({ row }) => row.original.class?.name || '-',
+    },
+    {
+      id: 'grade',
+      header: 'Grade',
+      cell: ({ row }) => row.original.class?.grade || '-',
+    },
+    {
+      accessorKey: 'maxCapacity',
+      header: 'Capacity',
+    },
+    {
+      accessorKey: 'createdAt',
+      header: 'Created',
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+    },
+    {
+      id: 'actions',
+      header: () => <div className="text-center">Action</div>,
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center gap-1">
+          <button
+            onClick={() => onView(row.original)}
+            className="flex h-8 w-8 items-center justify-center rounded text-gray-400 transition-colors hover:bg-[#25a194]/10 hover:text-[#25a194]"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => onEdit(row.original)}
+            className="flex h-8 w-8 items-center justify-center rounded text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+          >
+            <Edit className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => onDelete(row.original)}
+            className="flex h-8 w-8 items-center justify-center rounded text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+}
+
+interface SectionFormProps {
+  classes: AcademicClass[];
+  initial?: Partial<CreateAcademicSectionDto>;
+  isSubmitting: boolean;
+  onSubmit: (dto: CreateAcademicSectionDto | UpdateAcademicSectionDto) => void;
+  onCancel: () => void;
+  submitLabel: string;
+}
+
+function SectionForm({
+  classes,
+  initial,
+  isSubmitting,
+  onSubmit,
+  onCancel,
+  submitLabel,
+}: SectionFormProps) {
+  const [name, setName] = React.useState(initial?.name ?? '');
+  const [classId, setClassId] = React.useState(initial?.classId ?? '');
+  const [maxCapacity, setMaxCapacity] = React.useState(String(initial?.maxCapacity ?? 40));
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
+      name: name.trim(),
+      classId,
+      maxCapacity: Number(maxCapacity),
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <Label>Section Name</Label>
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="A" required disabled={isSubmitting} />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Class</Label>
+        <Select value={classId} onValueChange={(value) => setClassId(value ?? '')} disabled={isSubmitting}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a class" />
+          </SelectTrigger>
+          <SelectContent>
+            {classes.map((item) => (
+              <SelectItem key={item.id} value={item.id}>
+                {item.name}{item.grade ? ` (${item.grade})` : ''}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Max Capacity</Label>
+        <Input
+          type="number"
+          min={1}
+          value={maxCapacity}
+          onChange={(e) => setMaxCapacity(e.target.value)}
+          disabled={isSubmitting}
+          required
+        />
+      </div>
+      <div className="flex justify-end gap-3 pt-2">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+          Cancel
+        </Button>
+        <Button type="submit" className="bg-[#25a194] text-white hover:bg-[#208b80]" disabled={isSubmitting || !classId}>
+          {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          {submitLabel}
+        </Button>
+      </div>
+    </form>
+  );
+}
 
 export default function SectionsPage() {
+  const [result, setResult] = React.useState<PaginatedResponse<AcademicSection>>({
+    data: [],
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 0,
+  });
+  const [classOptions, setClassOptions] = React.useState<AcademicClass[]>([]);
+  const [search, setSearch] = React.useState('');
+  const deferredSearch = React.useDeferredValue(search);
+  const [classFilter, setClassFilter] = React.useState<string>('all');
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [createOpen, setCreateOpen] = React.useState(false);
+  const [viewTarget, setViewTarget] = React.useState<AcademicSection | null>(null);
+  const [editTarget, setEditTarget] = React.useState<AcademicSection | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<AcademicSection | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const fetchClassOptions = React.useCallback(async () => {
+    try {
+      const response = await academicApi.getClasses({ page: 1, limit: 100 });
+      setClassOptions(response.data);
+    } catch {
+      toast.error('Failed to load class options');
+    }
+  }, []);
+
+  const fetchSections = React.useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await academicApi.getSections({
+        page: pagination.pageIndex + 1,
+        limit: pagination.pageSize,
+        search: deferredSearch.trim() || undefined,
+        classId: classFilter === 'all' ? undefined : classFilter,
+      });
+      setResult(response);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to fetch sections'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [classFilter, deferredSearch, pagination.pageIndex, pagination.pageSize]);
+
+  React.useEffect(() => {
+    fetchClassOptions();
+  }, [fetchClassOptions]);
+
+  React.useEffect(() => {
+    fetchSections();
+  }, [fetchSections]);
+
+  React.useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, [deferredSearch, classFilter]);
+
+  const handleCreate = async (dto: CreateAcademicSectionDto | UpdateAcademicSectionDto) => {
+    setIsSubmitting(true);
+    try {
+      await academicApi.createSection(dto as CreateAcademicSectionDto);
+      toast.success('Section created successfully');
+      setCreateOpen(false);
+      await fetchSections();
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to create section'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdate = async (dto: CreateAcademicSectionDto | UpdateAcademicSectionDto) => {
+    if (!editTarget) return;
+    setIsSubmitting(true);
+    try {
+      await academicApi.updateSection(editTarget.id, dto as UpdateAcademicSectionDto);
+      toast.success('Section updated successfully');
+      setEditTarget(null);
+      await fetchSections();
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to update section'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setIsSubmitting(true);
+    try {
+      await academicApi.removeSection(deleteTarget.id);
+      toast.success('Section deleted successfully');
+      setDeleteTarget(null);
+      if (result.data.length === 1 && pagination.pageIndex > 0) {
+        setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }));
+      } else {
+        await fetchSections();
+      }
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Failed to delete section'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const columns = React.useMemo(
+    () => buildColumns(setViewTarget, setEditTarget, setDeleteTarget),
+    [],
+  );
+
   return (
-    <div className="w-full">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+    <div className="w-full h-full flex flex-col space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-[22px] font-semibold text-gray-800 tracking-tight">Section Details</h1>
-          <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-            <Link href="/" className="hover:text-[#25a194] transition-colors">Dashboard</Link>
+          <p className="mt-1 flex items-center gap-2 text-sm text-gray-500">
+            <Link href="/" className="transition-colors hover:text-[#25a194]">Dashboard</Link>
             <span>/</span>
-            <Link href="/classes" className="hover:text-[#25a194] transition-colors">Classes</Link>
+            <Link href="/classes" className="transition-colors hover:text-[#25a194]">Classes</Link>
             <span>/</span>
             <span className="text-gray-400">Section Details</span>
           </p>
         </div>
-        <Button className="bg-[#25a194] hover:bg-[#208b80] text-white px-5 h-10 rounded shadow-sm">
+        <Button onClick={() => setCreateOpen(true)} className="bg-[#25a194] text-white hover:bg-[#208b80]">
           + Add Section
         </Button>
       </div>
 
-      {/* Main Card container */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-        
-        {/* Toolbar */}
-        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {/* Export Dropdown */}
+      {error && (
+        <div className="flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          {error}
+        </div>
+      )}
+
+      <div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-gray-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-3">
             <Select defaultValue="export">
-              <SelectTrigger className="w-[110px] h-10 bg-white border-gray-200 text-gray-600 rounded">
+              <SelectTrigger className="h-10 w-[110px] border-gray-200 bg-white text-gray-600">
                 <div className="flex items-center gap-2">
                   <Download className="h-4 w-4" />
                   <span>Export</span>
@@ -60,21 +347,54 @@ export default function SectionsPage() {
               </SelectContent>
             </Select>
 
-            {/* Search Input */}
-            <div className="relative w-full sm:w-[250px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input 
-                placeholder="Search..." 
-                className="pl-9 h-10 bg-white border-gray-200 rounded text-sm w-full focus-visible:ring-[#25a194]"
+            <Select value={classFilter} onValueChange={(value) => setClassFilter(value ?? 'all')}>
+              <SelectTrigger className="h-10 w-[180px] border-gray-200 bg-white text-gray-600">
+                <SelectValue placeholder="All classes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Classes</SelectItem>
+                {classOptions.map((item) => (
+                  <SelectItem key={item.id} value={item.id}>
+                    {item.name}{item.grade ? ` (${item.grade})` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="relative w-full sm:w-[280px]">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <Input
+                placeholder="Search by section or class..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-10 border-gray-200 pl-9"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <span className="text-sm text-gray-500 hidden sm:inline-block">Rows per page:</span>
-            <Select defaultValue="10">
-              <SelectTrigger className="w-[70px] h-10 bg-white border-gray-200 text-gray-600 rounded">
-                <SelectValue placeholder="10" />
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={fetchSections}
+              disabled={isLoading}
+              className="border-gray-200 text-gray-600"
+            >
+              <RefreshCcw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <span className="text-sm text-gray-500">Rows per page:</span>
+            <Select
+              value={String(pagination.pageSize)}
+              onValueChange={(value) =>
+                setPagination({
+                  pageIndex: 0,
+                  pageSize: Number(value),
+                })
+              }
+            >
+              <SelectTrigger className="h-10 w-[80px] border-gray-200 bg-white text-gray-600">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="10">10</SelectItem>
@@ -85,71 +405,87 @@ export default function SectionsPage() {
           </div>
         </div>
 
-        {/* Table Overflow Wrapper */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left whitespace-nowrap">
-            <thead className="text-xs text-gray-800 bg-gray-50/50 uppercase font-semibold border-b border-gray-100">
-              <tr>
-                <th scope="col" className="px-5 py-4 w-12 text-center">
-                  <input type="checkbox" className="rounded border-gray-300 text-[#25a194] focus:ring-[#25a194] h-4 w-4" />
-                </th>
-                <th scope="col" className="px-4 py-4 w-20">S.L</th>
-                <th scope="col" className="px-4 py-4 min-w-[300px]">Section Name</th>
-                <th scope="col" className="px-4 py-4 w-32">Status</th>
-                <th scope="col" className="px-4 py-4 w-24 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {sectionsData.map((row, i) => (
-                <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-5 py-3 text-center">
-                    <input type="checkbox" className="rounded border-gray-300 text-[#25a194] focus:ring-[#25a194] h-4 w-4" />
-                  </td>
-                  <td className="px-4 py-4 text-gray-500">{row.sl}</td>
-                  <td className="px-4 py-4 text-gray-500">{row.sectionName}</td>
-                  <td className="px-4 py-4">
-                    <span className={`px-4 py-1.5 rounded text-xs font-semibold ${row.status === 'Active' ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-red-50 text-red-500'}`}>
-                      {row.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center justify-end gap-1">
-                      <button className="h-8 w-8 rounded text-gray-400 hover:text-[#25a194] hover:bg-[#25a194]/10 flex items-center justify-center transition-colors">
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button className="h-8 w-8 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 flex items-center justify-center transition-colors">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button className="h-8 w-8 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="p-2">
+          <DataTable
+            columns={columns}
+            data={result.data}
+            isLoading={isLoading}
+            emptyMessage="No sections found."
+            pagination={{
+              pageIndex: pagination.pageIndex,
+              pageSize: pagination.pageSize,
+              pageCount: result.totalPages,
+              rowCount: result.total,
+              onPaginationChange: setPagination,
+            }}
+          />
         </div>
-
-        {/* Pagination Toolbar */}
-        <div className="px-5 py-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-sm text-gray-500">
-            Showing 1 to 10 of 10 entries
-          </div>
-          <div className="flex items-center gap-1">
-            <button className="flex h-8 w-8 items-center justify-center rounded text-gray-400 hover:bg-gray-50 transition-colors">
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button className="flex h-8 w-8 items-center justify-center rounded bg-[#25a194] text-white font-medium text-sm transition-colors">
-              1
-            </button>
-            <button className="flex h-8 w-8 items-center justify-center rounded text-gray-400 hover:bg-gray-50 transition-colors">
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
       </div>
+
+      <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Add Section">
+        <SectionForm
+          classes={classOptions}
+          isSubmitting={isSubmitting}
+          onSubmit={handleCreate}
+          onCancel={() => setCreateOpen(false)}
+          submitLabel="Create Section"
+        />
+      </Modal>
+
+      <Modal open={!!editTarget} onClose={() => setEditTarget(null)} title="Edit Section">
+        {editTarget && (
+          <SectionForm
+            classes={classOptions}
+            initial={editTarget}
+            isSubmitting={isSubmitting}
+            onSubmit={handleUpdate}
+            onCancel={() => setEditTarget(null)}
+            submitLabel="Save Changes"
+          />
+        )}
+      </Modal>
+
+      <Modal open={!!viewTarget} onClose={() => setViewTarget(null)} title="Section Details">
+        {viewTarget && (
+          <div className="space-y-4 text-sm text-gray-600">
+            <div>
+              <p className="text-xs font-semibold uppercase text-gray-400">Section</p>
+              <p className="mt-1 text-base font-semibold text-gray-900">{viewTarget.name}</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <p className="text-xs font-semibold uppercase text-gray-400">Class</p>
+                <p className="mt-1">{viewTarget.class?.name || '-'}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase text-gray-400">Grade</p>
+                <p className="mt-1">{viewTarget.class?.grade || '-'}</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase text-gray-400">Max Capacity</p>
+              <p className="mt-1">{viewTarget.maxCapacity}</p>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Section" width="max-w-sm">
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Delete <span className="font-semibold text-gray-900">{deleteTarget?.name}</span>? This cannot be undone.
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button onClick={handleDelete} className="bg-red-500 text-white hover:bg-red-600" disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

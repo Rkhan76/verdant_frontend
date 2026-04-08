@@ -152,6 +152,60 @@ export interface AssignPermissionsDto {
   permissionIds: string[];
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface AcademicSection {
+  id: string;
+  name: string;
+  classId: string;
+  maxCapacity: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  class?: AcademicClass;
+}
+
+export interface AcademicClass {
+  id: string;
+  name: string;
+  grade: string | null;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  sections?: AcademicSection[];
+}
+
+export interface CreateAcademicClassDto {
+  name: string;
+  grade?: string;
+  description?: string;
+}
+
+export interface UpdateAcademicClassDto {
+  name?: string;
+  grade?: string;
+  description?: string;
+}
+
+export interface CreateAcademicSectionDto {
+  name: string;
+  classId: string;
+  maxCapacity?: number;
+}
+
+export interface UpdateAcademicSectionDto {
+  name?: string;
+  classId?: string;
+  maxCapacity?: number;
+}
+
 // ── Admissions ────────────────────────────────────────────────────────────
 
 export interface AdmissionEntity {

@@ -7,7 +7,7 @@ import {
   getCoreRowModel,
   useReactTable,
   getPaginationRowModel,
-  Table as TableType,
+  PaginationState,
 } from '@tanstack/react-table';
 
 import {
@@ -25,18 +25,60 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  pagination?: {
+    pageIndex: number;
+    pageSize: number;
+    pageCount: number;
+    rowCount: number;
+    onPaginationChange: (pagination: PaginationState) => void;
+  };
+  isLoading?: boolean;
+  emptyMessage?: string;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  pagination,
+  isLoading = false,
+  emptyMessage = 'No results.',
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
+    manualPagination: !!pagination,
+    pageCount: pagination?.pageCount,
+    rowCount: pagination?.rowCount,
+    onPaginationChange: pagination
+      ? (updater) => {
+          const nextPagination =
+            typeof updater === 'function'
+              ? updater({
+                  pageIndex: pagination.pageIndex,
+                  pageSize: pagination.pageSize,
+                })
+              : updater;
+          pagination.onPaginationChange(nextPagination);
+        }
+      : undefined,
+    state: pagination
+      ? {
+          pagination: {
+            pageIndex: pagination.pageIndex,
+            pageSize: pagination.pageSize,
+          },
+        }
+      : undefined,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  const currentPagination = table.getState().pagination;
+  const rowCount = pagination?.rowCount ?? table.getFilteredRowModel().rows.length;
+  const startRow = rowCount === 0 ? 0 : currentPagination.pageIndex * currentPagination.pageSize + 1;
+  const endRow = rowCount === 0
+    ? 0
+    : Math.min((currentPagination.pageIndex + 1) * currentPagination.pageSize, rowCount);
 
   return (
     <div className="w-full">
@@ -61,7 +103,13 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -78,7 +126,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}
@@ -88,12 +136,7 @@ export function DataTable<TData, TValue>({
 
       <div className="flex items-center justify-between px-2 py-4">
         <div className="text-sm text-gray-500">
-          Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
-          {Math.min(
-            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-            table.getFilteredRowModel().rows.length
-          )}{' '}
-          of {table.getFilteredRowModel().rows.length} entries
+          Showing {startRow} to {endRow} of {rowCount} entries
         </div>
         <div className="flex items-center space-x-1">
           <Button
