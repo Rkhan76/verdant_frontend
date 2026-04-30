@@ -1,21 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { studentApi } from '@/lib/api/students';
+import { academicApi } from '@/lib/api/academic';
 import api from '@/lib/api/axios';
+import type { AcademicClass } from '@/lib/types';
 
 export default function AddStudentPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [classes, setClasses] = useState<AcademicClass[]>([]);
+  const [selectedClassId, setSelectedClassId] = useState('');
+  const [isLoadingClasses, setIsLoadingClasses] = useState(true);
+  const sections = classes.find((cls) => cls.id === selectedClassId)?.sections ?? [];
+
+  // Fetch master classes on component mount
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        setIsLoadingClasses(true);
+        const data = await academicApi.getMasterClasses();
+        setClasses(data);
+      } catch (error) {
+        console.error('Failed to fetch classes:', error);
+        toast.error('Failed to load classes');
+      } finally {
+        setIsLoadingClasses(false);
+      }
+    };
+
+    fetchClasses();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,6 +50,8 @@ export default function AddStudentPage() {
       // 1. Register User Check
       const loginEmail = formData.get('loginEmail') as string;
       const loginPassword = formData.get('loginPassword') as string;
+      const fullName = formData.get('fullName') as string;
+      const [firstName, ...lastNameParts] = fullName.trim().split(/\s+/);
 
       if (!loginEmail || !loginPassword) {
          toast.error("Please provide login details (email and password)");
@@ -35,7 +60,14 @@ export default function AddStudentPage() {
       }
 
       // Register the student as a user via API
-      const authData = { email: loginEmail, password: loginPassword, role: 'STUDENT' };
+      const authData = {
+        email: loginEmail,
+        password: loginPassword,
+        firstName,
+        lastName: lastNameParts.join(' '),
+        role: 'STUDENT',
+        phone: formData.get('phone') as string,
+      };
       const authRes = await api.post('/auth/register', authData).catch((err) => {
          throw new Error(err.response?.data?.message || 'Failed to register student user account');
       });
@@ -115,13 +147,20 @@ export default function AddStudentPage() {
       toast.success('Student admission created successfully!');
       router.push('/students');
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      const resMsg = error.response?.data?.message;
+      const resMsg =
+        typeof error === 'object' && error !== null && 'response' in error
+          ? (error as { response?: { data?: { message?: string | string[] } } }).response?.data?.message
+          : undefined;
       if (Array.isArray(resMsg)) {
         resMsg.forEach((msg: string) => toast.error(msg));
       } else {
-        toast.error(error.message || resMsg || 'An error occurred during admission.');
+        toast.error(
+          (error instanceof Error ? error.message : undefined) ||
+            resMsg ||
+            'An error occurred during admission.',
+        );
       }
     } finally {
       setIsLoading(false);
@@ -160,16 +199,39 @@ export default function AddStudentPage() {
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-gray-700">Class <span className="text-red-500">*</span></Label>
-                <select name="class" required className="w-full h-10 border border-gray-200 rounded-md bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#25a194] text-gray-600">
-                  <option value="">Select a class</option>
-                  <option value="660e8400-e29b-41d4-a716-446655440000">Class 1 (Fake ID)</option>
+                <select 
+                  name="class" 
+                  required 
+                  value={selectedClassId}
+                  onChange={(e) => setSelectedClassId(e.target.value)}
+                  disabled={isLoadingClasses}
+                  className="w-full h-10 border border-gray-200 rounded-md bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#25a194] text-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">{isLoadingClasses ? 'Loading classes...' : 'Select a class'}</option>
+                  {classes.map((cls) => (
+                    <option key={cls.id} value={cls.id}>
+                      {cls.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-gray-700">Section <span className="text-red-500">*</span></Label>
-                <select name="section" required className="w-full h-10 border border-gray-200 rounded-md bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#25a194] text-gray-600">
-                  <option value="">Select section</option>
-                  <option value="770e8400-e29b-41d4-a716-446655440000">Section A (Fake ID)</option>
+                <select 
+                  name="section" 
+                  required 
+                  key={selectedClassId}
+                  disabled={!selectedClassId}
+                  className="w-full h-10 border border-gray-200 rounded-md bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#25a194] text-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">
+                    {!selectedClassId ? 'Select a class first' : 'Select section'}
+                  </option>
+                  {sections.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-2">

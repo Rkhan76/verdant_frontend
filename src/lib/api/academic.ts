@@ -17,6 +17,11 @@ export interface ListAcademicParams {
 }
 
 export const academicApi = {
+  getMasterClasses: async (): Promise<AcademicClass[]> => {
+    const res = await api.get('/academic/classes/master/all');
+    return res.data;
+  },
+
   getClasses: async (
     params: ListAcademicParams = {},
   ): Promise<PaginatedResponse<AcademicClass>> => {
