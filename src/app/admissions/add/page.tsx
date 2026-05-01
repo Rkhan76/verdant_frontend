@@ -27,9 +27,6 @@ const getResponseMessage = (error: unknown) => {
 };
 
 const buildAdmissionPayload = (formData: FormData): AdmissionCreateData => ({
-  applicationNumber:
-    getFormValue(formData, 'applicationNumber') ||
-    `APP-${new Date().getFullYear()}-${Date.now()}`,
   academicInfo: {
     year: getFormValue(formData, 'academicYear'),
     class: getFormValue(formData, 'class'),

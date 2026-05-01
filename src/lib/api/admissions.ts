@@ -10,7 +10,6 @@ export type AdmissionStatus =
   | 'enrolled';
 
 export type AdmissionCreateData = Omit<StudentAdmissionData, 'userId'> & {
-  applicationNumber: string;
   userId?: string;
 };
 
@@ -59,10 +58,10 @@ export interface AdmissionResponse {
 }
 
 export interface ApproveAdmissionData {
-  userId: string;
-  admissionNumber?: string;
-  rollNumber?: string;
-  approvedBy?: string;
+  id: string;
+  isAlreadyExist: boolean;
+  studentId?: string;
+  password?: string;
 }
 
 export interface RejectAdmissionData {
