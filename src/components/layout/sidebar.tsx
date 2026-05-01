@@ -33,6 +33,14 @@ const navItems = [
       { name: 'Student Categories', href: '/students/categories' },
     ]
   },
+  {
+    name: 'Admissions',
+    icon: FileText,
+    href: '/admissions',
+    submenus: [
+      { name: 'Admission List', href: '/admissions' },
+    ]
+  },
   { 
     name: 'Teachers', 
     icon: BookOpen, 
