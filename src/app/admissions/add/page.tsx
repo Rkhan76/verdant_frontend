@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { GuardianSearch } from '@/components/guardians/guardian-search';
 import { academicApi } from '@/lib/api/academic';
 import { admissionApi, type AdmissionCreateData } from '@/lib/api/admissions';
 import type { AcademicClass } from '@/lib/types';
@@ -26,95 +27,6 @@ const getResponseMessage = (error: unknown) => {
   return undefined;
 };
 
-const buildAdmissionPayload = (formData: FormData): AdmissionCreateData => {
-  const guardianMode = getFormValue(formData, 'guardianMode') || 'new';
-  const isGuardianExist = guardianMode === 'existing';
-
-  return {
-    isGuardianExist,
-    guardianId: isGuardianExist
-      ? getFormValue(formData, 'existingGuardianId')
-      : undefined,
-    academicInfo: {
-      year: getFormValue(formData, 'academicYear'),
-      class: getFormValue(formData, 'class'),
-      section: getFormValue(formData, 'section'),
-      admissionNumber: getFormValue(formData, 'admissionNumber'),
-    },
-    personalInfo: {
-      fullName: getFormValue(formData, 'fullName'),
-      category: getFormValue(formData, 'category'),
-      subcategory: getFormValue(formData, 'subcategory'),
-      gender: getFormValue(formData, 'gender'),
-      dateOfBirth: getFormValue(formData, 'dateOfBirth'),
-      phone: getFormValue(formData, 'phone'),
-      email: getFormValue(formData, 'email'),
-      aadharNumber: getFormValue(formData, 'aadharNumber'),
-      profileImage: getFormValue(formData, 'profileImage'),
-      aadharImage: getFormValue(formData, 'aadharImage'),
-      tcImage: getFormValue(formData, 'tcImage'),
-      birthCertificateImage: getFormValue(formData, 'birthCertificateImage'),
-    },
-    parentGuardianInfo: {
-      father: {
-        name: getFormValue(formData, 'fatherName'),
-        phone: getFormValue(formData, 'fatherPhone'),
-        occupation: getFormValue(formData, 'fatherOccupation'),
-      },
-      mother: {
-        name: getFormValue(formData, 'motherName'),
-        phone: getFormValue(formData, 'motherPhone'),
-        occupation: getFormValue(formData, 'motherOccupation'),
-      },
-      guardian: isGuardianExist
-        ? undefined
-        : {
-            relation: getFormValue(formData, 'guardian'),
-            name: getFormValue(formData, 'guardianName'),
-            email: getFormValue(formData, 'guardianEmail'),
-            phone: getFormValue(formData, 'guardianPhone'),
-            mobileNumber: getFormValue(formData, 'guardianMobileNumber'),
-            aadharNumber: getFormValue(formData, 'guardianAadharNumber'),
-            occupation: getFormValue(formData, 'guardianOccupation'),
-            address: getFormValue(formData, 'guardianAddress'),
-            photo: getFormValue(formData, 'guardianPhoto'),
-          },
-    },
-    medicalDetails: {
-      bloodGroup: getFormValue(formData, 'bloodGroup'),
-      height: getFormValue(formData, 'height'),
-      weight: getFormValue(formData, 'weight'),
-    },
-    bankDetails: {
-      accountNumber: getFormValue(formData, 'accountNumber'),
-      bankName: getFormValue(formData, 'bankName'),
-      bankBranch: getFormValue(formData, 'bankBranch'),
-      ifscCode: getFormValue(formData, 'ifscCode'),
-    },
-    previousSchoolDetails: {
-      schoolName: getFormValue(formData, 'schoolName'),
-      address: getFormValue(formData, 'schoolAddress'),
-    },
-    address: {
-      currentAddress: getFormValue(formData, 'currentAddress'),
-      permanentAddress: getFormValue(formData, 'permanentAddress'),
-    },
-    hostelDetails: {
-      hostelName: getFormValue(formData, 'hostelName'),
-      roomNumber: getFormValue(formData, 'roomNumber'),
-    },
-    documents: getFormValue(formData, 'documentName')
-      ? [
-          {
-            documentName: getFormValue(formData, 'documentName'),
-            file: getFormValue(formData, 'documentFile'),
-          },
-        ]
-      : undefined,
-    additionalDetails: getFormValue(formData, 'additionalDetails'),
-  };
-};
-
 export default function AddAdmissionPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -125,6 +37,94 @@ export default function AddAdmissionPage() {
   );
   const [isLoadingClasses, setIsLoadingClasses] = React.useState(true);
   const [showPassword, setShowPassword] = React.useState(false);
+  const [selectedGuardianId, setSelectedGuardianId] = React.useState('');
+
+  const buildAdmissionPayload = (formData: FormData): AdmissionCreateData => {
+    const guardianMode = getFormValue(formData, 'guardianMode') || 'new';
+    const isGuardianExist = guardianMode === 'existing';
+
+    return {
+      isGuardianExist,
+      guardianId: isGuardianExist ? selectedGuardianId : undefined,
+      academicInfo: {
+        year: getFormValue(formData, 'academicYear'),
+        class: getFormValue(formData, 'class'),
+        section: getFormValue(formData, 'section'),
+        admissionNumber: getFormValue(formData, 'admissionNumber'),
+      },
+      personalInfo: {
+        fullName: getFormValue(formData, 'fullName'),
+        category: getFormValue(formData, 'category'),
+        subcategory: getFormValue(formData, 'subcategory'),
+        gender: getFormValue(formData, 'gender'),
+        dateOfBirth: getFormValue(formData, 'dateOfBirth'),
+        phone: getFormValue(formData, 'phone'),
+        email: getFormValue(formData, 'email'),
+        aadharNumber: getFormValue(formData, 'aadharNumber'),
+        profileImage: getFormValue(formData, 'profileImage'),
+        aadharImage: getFormValue(formData, 'aadharImage'),
+        tcImage: getFormValue(formData, 'tcImage'),
+        birthCertificateImage: getFormValue(formData, 'birthCertificateImage'),
+      },
+      parentGuardianInfo: {
+        father: {
+          name: getFormValue(formData, 'fatherName'),
+          phone: getFormValue(formData, 'fatherPhone'),
+          occupation: getFormValue(formData, 'fatherOccupation'),
+        },
+        mother: {
+          name: getFormValue(formData, 'motherName'),
+          phone: getFormValue(formData, 'motherPhone'),
+          occupation: getFormValue(formData, 'motherOccupation'),
+        },
+        guardian: isGuardianExist
+          ? undefined
+          : {
+              relation: getFormValue(formData, 'guardian'),
+              name: getFormValue(formData, 'guardianName'),
+              email: getFormValue(formData, 'guardianEmail'),
+              phone: getFormValue(formData, 'guardianPhone'),
+              mobileNumber: getFormValue(formData, 'guardianMobileNumber'),
+              aadharNumber: getFormValue(formData, 'guardianAadharNumber'),
+              occupation: getFormValue(formData, 'guardianOccupation'),
+              address: getFormValue(formData, 'guardianAddress'),
+              photo: getFormValue(formData, 'guardianPhoto'),
+            },
+      },
+      medicalDetails: {
+        bloodGroup: getFormValue(formData, 'bloodGroup'),
+        height: getFormValue(formData, 'height'),
+        weight: getFormValue(formData, 'weight'),
+      },
+      bankDetails: {
+        accountNumber: getFormValue(formData, 'accountNumber'),
+        bankName: getFormValue(formData, 'bankName'),
+        bankBranch: getFormValue(formData, 'bankBranch'),
+        ifscCode: getFormValue(formData, 'ifscCode'),
+      },
+      previousSchoolDetails: {
+        schoolName: getFormValue(formData, 'schoolName'),
+        address: getFormValue(formData, 'schoolAddress'),
+      },
+      address: {
+        currentAddress: getFormValue(formData, 'currentAddress'),
+        permanentAddress: getFormValue(formData, 'permanentAddress'),
+      },
+      hostelDetails: {
+        hostelName: getFormValue(formData, 'hostelName'),
+        roomNumber: getFormValue(formData, 'roomNumber'),
+      },
+      documents: getFormValue(formData, 'documentName')
+        ? [
+            {
+              documentName: getFormValue(formData, 'documentName'),
+              file: getFormValue(formData, 'documentFile'),
+            },
+          ]
+        : undefined,
+      additionalDetails: getFormValue(formData, 'additionalDetails'),
+    };
+  };
 
   const sections = React.useMemo(
     () => classes.find((cls) => cls.id === selectedClassId)?.sections ?? [],
@@ -384,15 +384,11 @@ export default function AddAdmissionPage() {
 
             {guardianMode === 'existing' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-gray-700">Guardian ID <span className="text-red-500">*</span></Label>
-                  <Input
-                    name="existingGuardianId"
-                    required
-                    placeholder="Enter existing guardian UUID"
-                    className="h-10 border-gray-200 focus-visible:ring-[#25a194]"
-                  />
-                </div>
+                <GuardianSearch
+                  value={selectedGuardianId}
+                  onChange={(guardianId) => setSelectedGuardianId(guardianId)}
+                  required
+                />
               </div>
             ) : null}
 
