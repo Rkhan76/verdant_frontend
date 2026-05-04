@@ -15,7 +15,7 @@ import { AxiosError } from 'axios';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setAuth, setMfaToken, setSetupToken, isAuthenticated, user, deviceToken } = useAuthStore();
+  const { setAuth, isAuthenticated, user, deviceToken } = useAuthStore();
   
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('superadmin@verdant.local');
@@ -53,13 +53,7 @@ export default function LoginPage() {
 
       const data = response.data;
 
-      if (data.requiresMfa && data.mfaToken) {
-        setMfaToken(data.mfaToken);
-        router.push('/mfa-verify');
-      } else if (data.requiresMfaSetup && data.setupToken) {
-        setSetupToken(data.setupToken);
-        router.push('/mfa-setup');
-      } else if (data.accessToken && data.refreshToken && data.user) {
+      if (data.accessToken && data.refreshToken && data.user) {
         setAuth({
           user: data.user,
           accessToken: data.accessToken,

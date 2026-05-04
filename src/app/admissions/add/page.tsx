@@ -26,81 +26,103 @@ const getResponseMessage = (error: unknown) => {
   return undefined;
 };
 
-const buildAdmissionPayload = (formData: FormData): AdmissionCreateData => ({
-  academicInfo: {
-    year: getFormValue(formData, 'academicYear'),
-    class: getFormValue(formData, 'class'),
-    section: getFormValue(formData, 'section'),
-    rollNumber: getFormValue(formData, 'rollNumber'),
-    admissionNumber: getFormValue(formData, 'admissionNumber'),
-  },
-  personalInfo: {
-    fullName: getFormValue(formData, 'fullName'),
-    category: getFormValue(formData, 'category'),
-    gender: getFormValue(formData, 'gender'),
-    dateOfBirth: getFormValue(formData, 'dateOfBirth'),
-    phone: getFormValue(formData, 'phone'),
-    email: getFormValue(formData, 'email'),
-  },
-  parentGuardianInfo: {
-    father: {
-      name: getFormValue(formData, 'fatherName'),
-      phone: getFormValue(formData, 'fatherPhone'),
-      occupation: getFormValue(formData, 'fatherOccupation'),
+const buildAdmissionPayload = (formData: FormData): AdmissionCreateData => {
+  const guardianMode = getFormValue(formData, 'guardianMode') || 'new';
+  const isGuardianExist = guardianMode === 'existing';
+
+  return {
+    isGuardianExist,
+    guardianId: isGuardianExist
+      ? getFormValue(formData, 'existingGuardianId')
+      : undefined,
+    academicInfo: {
+      year: getFormValue(formData, 'academicYear'),
+      class: getFormValue(formData, 'class'),
+      section: getFormValue(formData, 'section'),
+      admissionNumber: getFormValue(formData, 'admissionNumber'),
     },
-    mother: {
-      name: getFormValue(formData, 'motherName'),
-      phone: getFormValue(formData, 'motherPhone'),
-      occupation: getFormValue(formData, 'motherOccupation'),
+    personalInfo: {
+      fullName: getFormValue(formData, 'fullName'),
+      category: getFormValue(formData, 'category'),
+      subcategory: getFormValue(formData, 'subcategory'),
+      gender: getFormValue(formData, 'gender'),
+      dateOfBirth: getFormValue(formData, 'dateOfBirth'),
+      phone: getFormValue(formData, 'phone'),
+      email: getFormValue(formData, 'email'),
+      aadharNumber: getFormValue(formData, 'aadharNumber'),
+      profileImage: getFormValue(formData, 'profileImage'),
+      aadharImage: getFormValue(formData, 'aadharImage'),
+      tcImage: getFormValue(formData, 'tcImage'),
+      birthCertificateImage: getFormValue(formData, 'birthCertificateImage'),
     },
-    guardian: {
-      relation: getFormValue(formData, 'guardian'),
-      name: getFormValue(formData, 'guardianName'),
-      email: getFormValue(formData, 'guardianEmail'),
-      phone: getFormValue(formData, 'guardianPhone'),
-      occupation: getFormValue(formData, 'guardianOccupation'),
-      address: getFormValue(formData, 'guardianAddress'),
+    parentGuardianInfo: {
+      father: {
+        name: getFormValue(formData, 'fatherName'),
+        phone: getFormValue(formData, 'fatherPhone'),
+        occupation: getFormValue(formData, 'fatherOccupation'),
+      },
+      mother: {
+        name: getFormValue(formData, 'motherName'),
+        phone: getFormValue(formData, 'motherPhone'),
+        occupation: getFormValue(formData, 'motherOccupation'),
+      },
+      guardian: isGuardianExist
+        ? undefined
+        : {
+            relation: getFormValue(formData, 'guardian'),
+            name: getFormValue(formData, 'guardianName'),
+            email: getFormValue(formData, 'guardianEmail'),
+            phone: getFormValue(formData, 'guardianPhone'),
+            mobileNumber: getFormValue(formData, 'guardianMobileNumber'),
+            aadharNumber: getFormValue(formData, 'guardianAadharNumber'),
+            occupation: getFormValue(formData, 'guardianOccupation'),
+            address: getFormValue(formData, 'guardianAddress'),
+            photo: getFormValue(formData, 'guardianPhoto'),
+          },
     },
-  },
-  medicalDetails: {
-    bloodGroup: getFormValue(formData, 'bloodGroup'),
-    height: getFormValue(formData, 'height'),
-    weight: getFormValue(formData, 'weight'),
-  },
-  bankDetails: {
-    accountNumber: getFormValue(formData, 'accountNumber'),
-    bankName: getFormValue(formData, 'bankName'),
-    ifscCode: getFormValue(formData, 'ifscCode'),
-    nationalId: getFormValue(formData, 'nationalId'),
-  },
-  previousSchoolDetails: {
-    schoolName: getFormValue(formData, 'schoolName'),
-    address: getFormValue(formData, 'schoolAddress'),
-  },
-  address: {
-    currentAddress: getFormValue(formData, 'currentAddress'),
-    permanentAddress: getFormValue(formData, 'permanentAddress'),
-  },
-  hostelDetails: {
-    hostelName: getFormValue(formData, 'hostelName'),
-    roomNumber: getFormValue(formData, 'roomNumber'),
-  },
-  documents: getFormValue(formData, 'documentName')
-    ? [
-        {
-          documentName: getFormValue(formData, 'documentName'),
-          file: getFormValue(formData, 'documentFile'),
-        },
-      ]
-    : undefined,
-  additionalDetails: getFormValue(formData, 'additionalDetails'),
-});
+    medicalDetails: {
+      bloodGroup: getFormValue(formData, 'bloodGroup'),
+      height: getFormValue(formData, 'height'),
+      weight: getFormValue(formData, 'weight'),
+    },
+    bankDetails: {
+      accountNumber: getFormValue(formData, 'accountNumber'),
+      bankName: getFormValue(formData, 'bankName'),
+      bankBranch: getFormValue(formData, 'bankBranch'),
+      ifscCode: getFormValue(formData, 'ifscCode'),
+    },
+    previousSchoolDetails: {
+      schoolName: getFormValue(formData, 'schoolName'),
+      address: getFormValue(formData, 'schoolAddress'),
+    },
+    address: {
+      currentAddress: getFormValue(formData, 'currentAddress'),
+      permanentAddress: getFormValue(formData, 'permanentAddress'),
+    },
+    hostelDetails: {
+      hostelName: getFormValue(formData, 'hostelName'),
+      roomNumber: getFormValue(formData, 'roomNumber'),
+    },
+    documents: getFormValue(formData, 'documentName')
+      ? [
+          {
+            documentName: getFormValue(formData, 'documentName'),
+            file: getFormValue(formData, 'documentFile'),
+          },
+        ]
+      : undefined,
+    additionalDetails: getFormValue(formData, 'additionalDetails'),
+  };
+};
 
 export default function AddAdmissionPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
   const [classes, setClasses] = React.useState<AcademicClass[]>([]);
   const [selectedClassId, setSelectedClassId] = React.useState('');
+  const [guardianMode, setGuardianMode] = React.useState<'new' | 'existing'>(
+    'new',
+  );
   const [isLoadingClasses, setIsLoadingClasses] = React.useState(true);
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -217,11 +239,6 @@ export default function AddAdmissionPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">Roll Number</Label>
-                <Input name="rollNumber" defaultValue="101" placeholder="Enter your rollNumber" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
-              </div>
-
-              <div className="space-y-2">
                 <Label className="text-sm font-semibold text-gray-700">Admission No <span className="text-red-500">*</span></Label>
                 <Input name="admissionNumber" defaultValue="ADM2024-001" required placeholder="Enter admission number" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
@@ -240,6 +257,10 @@ export default function AddAdmissionPage() {
                 </select>
               </div>
               <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700">Subcategory</Label>
+                <Input name="subcategory" placeholder="Enter subcategory" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+              </div>
+              <div className="space-y-2">
                 <Label className="text-sm font-semibold text-gray-700">Gender</Label>
                 <select name="gender" defaultValue="Male" className="w-full h-10 border border-gray-200 rounded-md bg-white px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#25a194] text-gray-600">
                   <option value="">Select Gender</option>
@@ -256,18 +277,32 @@ export default function AddAdmissionPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">Phone <span className="text-red-500">*</span></Label>
-                <Input name="phone" defaultValue="9876543210" required placeholder="Enter Your Phone Number" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Label className="text-sm font-semibold text-gray-700">Phone</Label>
+                <Input name="phone" defaultValue="9876543210" placeholder="Enter Your Phone Number" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">Email <span className="text-red-500">*</span></Label>
-                <Input name="email" defaultValue="john.doe@example.com" required type="email" placeholder="Enter Your Email" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Label className="text-sm font-semibold text-gray-700">Email</Label>
+                <Input name="email" defaultValue="john.doe@example.com" type="email" placeholder="Enter Your Email" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">Student Photo</Label>
-                <div className="border border-dashed border-gray-200 rounded-md h-10 flex items-center justify-center text-sm text-gray-500 cursor-pointer hover:bg-gray-50 bg-white">
-                  Drag & drop a file here or click
-                </div>
+                <Label className="text-sm font-semibold text-gray-700">Aadhar Number</Label>
+                <Input name="aadharNumber" placeholder="Enter Aadhar Number" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700">Profile Image URL</Label>
+                <Input name="profileImage" placeholder="Enter profile image URL" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700">Aadhar Image URL</Label>
+                <Input name="aadharImage" placeholder="Enter Aadhar image URL" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700">TC Image URL</Label>
+                <Input name="tcImage" placeholder="Enter TC image URL" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700">Birth Certificate Image URL</Label>
+                <Input name="birthCertificateImage" placeholder="Enter birth certificate image URL" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
             </div>
           </CardContent>
@@ -320,6 +355,48 @@ export default function AddAdmissionPage() {
             </div>
 
             <div className="mb-6">
+              <Label className="text-base font-semibold text-gray-800 mb-3 block">Guardian Source</Label>
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="new"
+                    name="guardianMode"
+                    className="w-4 h-4 text-[#25a194] focus:ring-[#25a194] accent-[#25a194]"
+                    checked={guardianMode === 'new'}
+                    onChange={() => setGuardianMode('new')}
+                  />
+                  Create New Guardian On Approve
+                </label>
+                <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="existing"
+                    name="guardianMode"
+                    className="w-4 h-4 text-[#25a194] focus:ring-[#25a194] accent-[#25a194]"
+                    checked={guardianMode === 'existing'}
+                    onChange={() => setGuardianMode('existing')}
+                  />
+                  Link Existing Guardian
+                </label>
+              </div>
+            </div>
+
+            {guardianMode === 'existing' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-gray-700">Guardian ID <span className="text-red-500">*</span></Label>
+                  <Input
+                    name="existingGuardianId"
+                    required
+                    placeholder="Enter existing guardian UUID"
+                    className="h-10 border-gray-200 focus-visible:ring-[#25a194]"
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            <div className="mb-6">
               <Label className="text-base font-semibold text-gray-800 mb-3 block">Select a Guardian</Label>
               <div className="flex items-center gap-6">
                 <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
@@ -340,29 +417,35 @@ export default function AddAdmissionPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-gray-700">Guardian Name</Label>
-                <Input name="guardianName" defaultValue="Robert Doe" placeholder="Enter Gaurdian Name" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Input name="guardianName" disabled={guardianMode === 'existing'} defaultValue="Robert Doe" placeholder="Enter Gaurdian Name" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-gray-700">Guardian Email</Label>
-                <Input name="guardianEmail" defaultValue="robert.doe@example.com" type="email" placeholder="Enter Gaurdian Email" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Input name="guardianEmail" disabled={guardianMode === 'existing'} defaultValue="robert.doe@example.com" type="email" placeholder="Enter Gaurdian Email" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-gray-700">Guardian Phone</Label>
-                <Input name="guardianPhone" defaultValue="9876543211" placeholder="Enter Gaurdian Number" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Input name="guardianPhone" disabled={guardianMode === 'existing'} defaultValue="9876543211" placeholder="Enter Gaurdian Number" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700">Guardian Mobile Number</Label>
+                <Input name="guardianMobileNumber" disabled={guardianMode === 'existing'} defaultValue="9876543211" placeholder="Enter guardian mobile number" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-gray-700">Guardian Aadhar Number</Label>
+                <Input name="guardianAadharNumber" disabled={guardianMode === 'existing'} placeholder="Enter guardian Aadhar number" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-semibold text-gray-700">Guardian Occupation</Label>
-                <Input name="guardianOccupation" defaultValue="Engineer" placeholder="Enter Gaurdian Occupation" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Input name="guardianOccupation" disabled={guardianMode === 'existing'} defaultValue="Engineer" placeholder="Enter Gaurdian Occupation" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2 md:col-span-3">
                 <Label className="text-sm font-semibold text-gray-700">Guardian Address</Label>
-                <Input name="guardianAddress" defaultValue="123 Main Street, City" placeholder="Enter Gaurdian Address" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Input name="guardianAddress" disabled={guardianMode === 'existing'} defaultValue="123 Main Street, City" placeholder="Enter Gaurdian Address" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">Guardian Photo</Label>
-                <div className="border border-dashed border-gray-200 rounded-md h-10 flex items-center justify-center text-sm text-gray-500 cursor-pointer hover:bg-gray-50 bg-white">
-                  Drag & drop a file here or click
-                </div>
+                <Label className="text-sm font-semibold text-gray-700">Guardian Photo Image URL</Label>
+                <Input name="guardianPhoto" disabled={guardianMode === 'existing'} placeholder="Enter guardian photo image URL" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
             </div>
           </CardContent>
@@ -417,12 +500,12 @@ export default function AddAdmissionPage() {
                 <Input name="bankName" defaultValue="Test Bank" placeholder="Enter bank name" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">IFSC Code</Label>
-                <Input name="ifscCode" defaultValue="TEST0001234" placeholder="Enter IFSC Code" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Label className="text-sm font-semibold text-gray-700">Bank Branch</Label>
+                <Input name="bankBranch" placeholder="Enter bank branch" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">National Identification Number</Label>
-                <Input name="nationalId" defaultValue="NID12345678" placeholder="Enter national identification nu" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Label className="text-sm font-semibold text-gray-700">IFSC Code</Label>
+                <Input name="ifscCode" defaultValue="TEST0001234" placeholder="Enter IFSC Code" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
             </div>
           </CardContent>

@@ -16,7 +16,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!hasHydrated) return;
     
-    const authPaths = ['/login', '/mfa-verify', '/mfa-setup'];
+    const authPaths = ['/login'];
     if (!isAuthenticated && !authPaths.includes(pathname)) {
       router.push('/login');
     }
@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const toggleMinimize = () => setIsMinimized(!isMinimized);
 
-  const authPaths = ['/login', '/mfa-verify', '/mfa-setup'];
+  const authPaths = ['/login'];
   if (authPaths.includes(pathname)) {
     return <>{children}</>;
   }

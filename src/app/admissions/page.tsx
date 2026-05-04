@@ -232,16 +232,21 @@ export default function AdmissionsPage() {
           year: formData.get('year') as string,
           class: formData.get('class') as string,
           section: formData.get('section') as string,
-          rollNumber: formData.get('rollNumber') as string,
           admissionNumber: formData.get('admissionNumber') as string,
         },
         personalInfo: {
           fullName: formData.get('fullName') as string,
           category: formData.get('category') as string,
+          subcategory: formData.get('subcategory') as string,
           gender: formData.get('gender') as string,
           dateOfBirth: formData.get('dateOfBirth') as string,
           phone: formData.get('phone') as string,
           email: formData.get('email') as string,
+          aadharNumber: formData.get('aadharNumber') as string,
+          profileImage: formData.get('profileImage') as string,
+          aadharImage: formData.get('aadharImage') as string,
+          tcImage: formData.get('tcImage') as string,
+          birthCertificateImage: formData.get('birthCertificateImage') as string,
         },
         parentGuardianInfo: {
           father: {
@@ -259,8 +264,11 @@ export default function AdmissionsPage() {
             name: formData.get('guardianName') as string,
             email: formData.get('guardianEmail') as string,
             phone: formData.get('guardianPhone') as string,
+            mobileNumber: formData.get('guardianMobileNumber') as string,
+            aadharNumber: formData.get('guardianAadharNumber') as string,
             occupation: formData.get('guardianOccupation') as string,
             address: formData.get('guardianAddress') as string,
+            photo: formData.get('guardianPhoto') as string,
           },
         },
         medicalDetails: {
@@ -271,8 +279,8 @@ export default function AdmissionsPage() {
         bankDetails: {
           accountNumber: formData.get('accountNumber') as string,
           bankName: formData.get('bankName') as string,
+          bankBranch: formData.get('bankBranch') as string,
           ifscCode: formData.get('ifscCode') as string,
-          nationalId: formData.get('nationalId') as string,
         },
         previousSchoolDetails: {
           schoolName: formData.get('schoolName') as string,
@@ -961,10 +969,6 @@ export default function AdmissionsPage() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Roll Number</Label>
-                    <Input name="rollNumber" defaultValue={selectedAdmissionDetail.rollNumber || ''} />
-                  </div>
-                  <div className="space-y-2">
                     <Label>Admission Number</Label>
                     <Input name="admissionNumber" defaultValue={selectedAdmissionDetail.admissionNumber || ''} />
                   </div>
@@ -993,6 +997,10 @@ export default function AdmissionsPage() {
                     </select>
                   </div>
                   <div className="space-y-2">
+                    <Label>Subcategory</Label>
+                    <Input name="subcategory" defaultValue={selectedAdmissionDetail.subcategory || ''} />
+                  </div>
+                  <div className="space-y-2">
                     <Label>Gender</Label>
                     <select 
                       name="gender" 
@@ -1015,6 +1023,26 @@ export default function AdmissionsPage() {
                   <div className="space-y-2">
                     <Label>Email</Label>
                     <Input type="email" name="email" defaultValue={selectedAdmissionDetail.email || ''} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Aadhar Number</Label>
+                    <Input name="aadharNumber" defaultValue={selectedAdmissionDetail.aadharNumber || ''} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Profile Image URL</Label>
+                    <Input name="profileImage" defaultValue={selectedAdmissionDetail.profileImage || ''} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Aadhar Image URL</Label>
+                    <Input name="aadharImage" defaultValue={selectedAdmissionDetail.aadharImage || ''} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>TC Image URL</Label>
+                    <Input name="tcImage" defaultValue={selectedAdmissionDetail.tcImage || ''} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Birth Certificate Image URL</Label>
+                    <Input name="birthCertificateImage" defaultValue={selectedAdmissionDetail.birthCertificateImage || ''} />
                   </div>
                 </div>
               </div>
@@ -1077,12 +1105,24 @@ export default function AdmissionsPage() {
                         <Input name="guardianPhone" defaultValue={(selectedAdmissionDetail.guardianInfo as any)?.phone || ''} />
                       </div>
                       <div className="space-y-2">
+                        <Label>Mobile Number</Label>
+                        <Input name="guardianMobileNumber" defaultValue={(selectedAdmissionDetail.guardianInfo as any)?.mobileNumber || ''} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Aadhar Number</Label>
+                        <Input name="guardianAadharNumber" defaultValue={(selectedAdmissionDetail.guardianInfo as any)?.aadharNumber || ''} />
+                      </div>
+                      <div className="space-y-2">
                         <Label>Occupation</Label>
                         <Input name="guardianOccupation" defaultValue={(selectedAdmissionDetail.guardianInfo as any)?.occupation || ''} />
                       </div>
                       <div className="space-y-2">
                         <Label>Address</Label>
                         <Input name="guardianAddress" defaultValue={(selectedAdmissionDetail.guardianInfo as any)?.address || ''} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Photo Image URL</Label>
+                        <Input name="guardianPhoto" defaultValue={(selectedAdmissionDetail.guardianInfo as any)?.photo || ''} />
                       </div>
                     </div>
                   </div>
@@ -1115,12 +1155,12 @@ export default function AdmissionsPage() {
                       <Input name="bankName" defaultValue={(selectedAdmissionDetail.bankDetails as any)?.bankName || ''} />
                     </div>
                     <div className="space-y-2">
-                      <Label>IFSC Code</Label>
-                      <Input name="ifscCode" defaultValue={(selectedAdmissionDetail.bankDetails as any)?.ifscCode || ''} />
+                      <Label>Bank Branch</Label>
+                      <Input name="bankBranch" defaultValue={(selectedAdmissionDetail.bankDetails as any)?.bankBranch || ''} />
                     </div>
                     <div className="space-y-2">
-                      <Label>National ID</Label>
-                      <Input name="nationalId" defaultValue={(selectedAdmissionDetail.bankDetails as any)?.nationalId || ''} />
+                      <Label>IFSC Code</Label>
+                      <Input name="ifscCode" defaultValue={(selectedAdmissionDetail.bankDetails as any)?.ifscCode || ''} />
                     </div>
                   </div>
                 </div>

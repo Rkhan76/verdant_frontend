@@ -11,6 +11,9 @@ export type AdmissionStatus =
 
 export type AdmissionCreateData = Omit<StudentAdmissionData, 'userId'> & {
   userId?: string;
+  isGuardianExist?: boolean;
+  isGaurdianExist?: boolean;
+  guardianId?: string;
 };
 
 export type AdmissionUpdateData = Partial<AdmissionCreateData>;
@@ -25,14 +28,41 @@ export interface AdmissionResponse {
   rollNumber?: string | null;
   year?: string | null;
   classId?: string | null;
+  class?: {
+    id: string;
+    name: string;
+    grade?: string | null;
+  } | null;
   sectionId?: string | null;
+  section?: {
+    id: string;
+    name: string;
+    classId?: string;
+  } | null;
+  isGuardianExist?: boolean;
+  guardianId?: string | null;
+  guardian?: {
+    id: string;
+    name: string;
+    relation?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    occupation?: string | null;
+    address?: string | null;
+    photo?: string | null;
+  } | null;
   fullName?: string | null;
   category?: string | null;
+  subcategory?: string | null;
   gender?: string | null;
   dateOfBirth?: string | null;
   phone?: string | null;
   email?: string | null;
+  aadharNumber?: string | null;
   profileImage?: string | null;
+  aadharImage?: string | null;
+  tcImage?: string | null;
+  birthCertificateImage?: string | null;
   fatherInfo?: Record<string, unknown> | null;
   motherInfo?: Record<string, unknown> | null;
   guardianInfo?: Record<string, unknown> | null;

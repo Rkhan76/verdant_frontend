@@ -18,11 +18,16 @@ export interface StudentAdmissionData {
   personalInfo?: {
     fullName?: string;
     category?: string;
+    subcategory?: string;
     gender?: string;
     dateOfBirth?: string;
     phone?: string;
     email?: string;
+    aadharNumber?: string;
     profileImage?: string;
+    aadharImage?: string;
+    tcImage?: string;
+    birthCertificateImage?: string;
   };
   parentGuardianInfo?: {
     father?: {
@@ -42,6 +47,8 @@ export interface StudentAdmissionData {
       name?: string;
       email?: string;
       phone?: string;
+      mobileNumber?: string;
+      aadharNumber?: string;
       occupation?: string;
       address?: string;
       photo?: string;
@@ -55,8 +62,8 @@ export interface StudentAdmissionData {
   bankDetails?: {
     accountNumber?: string;
     bankName?: string;
+    bankBranch?: string;
     ifscCode?: string;
-    nationalId?: string;
   };
   previousSchoolDetails?: {
     schoolName?: string;
@@ -74,6 +81,18 @@ export interface StudentAdmissionData {
   additionalDetails?: string;
 }
 
+export interface StudentClass {
+  id: string;
+  name: string;
+  grade: string | null;
+}
+
+export interface StudentSection {
+  id: string;
+  name: string;
+  maxCapacity: number;
+}
+
 export interface StudentResponse {
   id: string;
   userId: string;
@@ -82,14 +101,21 @@ export interface StudentResponse {
   deletedAt: string | null;
   year?: string;
   classId?: string;
+  class?: StudentClass | null;
   sectionId?: string;
+  section?: StudentSection | null;
   fullName?: string;
   category?: string;
+  subcategory?: string;
   gender?: string;
   dateOfBirth?: string;
   phone?: string;
   email?: string;
+  aadharNumber?: string;
   profileImage?: string;
+  aadharImage?: string;
+  tcImage?: string;
+  birthCertificateImage?: string;
   admissionNumber?: string;
   rollNumber?: string;
   fatherInfo?: any;

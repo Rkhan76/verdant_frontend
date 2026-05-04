@@ -288,12 +288,12 @@ export default function AddStudentPage() {
                 <Input name="bankName" placeholder="Enter bank name" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">IFSC Code</Label>
-                <Input name="ifscCode" placeholder="Enter IFSC Code" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Label className="text-sm font-semibold text-gray-700">Bank Branch</Label>
+                <Input name="bankBranch" placeholder="Enter bank branch" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-semibold text-gray-700">National Identification Number</Label>
-                <Input name="nationalId" placeholder="Enter national identification nu" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
+                <Label className="text-sm font-semibold text-gray-700">IFSC Code</Label>
+                <Input name="ifscCode" placeholder="Enter IFSC Code" className="h-10 border-gray-200 focus-visible:ring-[#25a194]" />
               </div>
             </div>
           </CardContent>

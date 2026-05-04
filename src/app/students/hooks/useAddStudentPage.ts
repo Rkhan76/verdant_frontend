@@ -68,8 +68,8 @@ const buildStudentPayload = (formData: FormData, userId: string): StudentAdmissi
   bankDetails: {
     accountNumber: getFormValue(formData, 'accountNumber'),
     bankName: getFormValue(formData, 'bankName'),
+    bankBranch: getFormValue(formData, 'bankBranch'),
     ifscCode: getFormValue(formData, 'ifscCode'),
-    nationalId: getFormValue(formData, 'nationalId'),
   },
   previousSchoolDetails: {
     schoolName: getFormValue(formData, 'schoolName'),
